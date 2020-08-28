@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class Shape : MonoBehaviour
 {
@@ -8,12 +9,6 @@ public class Shape : MonoBehaviour
     public float speed = 1.0f;
 
     float lastMoveDown = 0;
-
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
 
     // Update is called once per frame
     void Update()
@@ -57,6 +52,17 @@ public class Shape : MonoBehaviour
             if (!IsInGrid())
             {
                 transform.position += new Vector3(0, 1, 0);
+
+                bool rowDeleted = GameBoard.DeleteAllFullRows();
+
+                if(rowDeleted)
+                {
+                    GameBoard.DeleteAllFullRows();
+
+                    //TODO change the score on UI
+                    IncreaseTextUIScore();
+
+                }
 
                 enabled = false;
 
@@ -161,6 +167,16 @@ public class Shape : MonoBehaviour
             Debug.Log("Cube at" + vect.x + " " + vect.y);
         }
 
-        GameBoard.PrintArray();
+      //  GameBoard.PrintArray();
+    }
+
+    void IncreaseTextUIScore()
+    {
+        var textUIComp = GameObject.Find("Score").GetComponent<Text>();
+
+        int score = int.Parse(textUIComp.text);
+        score++;
+
+        textUIComp.text = score.ToString();
     }
 }
