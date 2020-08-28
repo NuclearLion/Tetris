@@ -2,13 +2,36 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class Shape : MonoBehaviour
 {
-
-    public float speed = 1.0f;
+    public static float speed = 1.0f;
 
     float lastMoveDown = 0;
+
+    void Start()
+    {
+        if(!IsInGrid())
+        {
+            SoundManager.Instance.PlayOneShot(SoundManager.Instance.gameOver);
+
+            Invoke("OpenGameOverScene", .5f);
+        }
+
+        InvokeRepeating("IncreaseSpeed", 2.0f, 2.0f);
+    }
+
+    void OpenGameOverScene()
+    {
+        Destroy(gameObject);
+        SceneManager.LoadScene("GameOver");
+    }
+
+    void IncreaseSpeed()
+    {
+        Shape.speed -= .001f;
+    }
 
     // Update is called once per frame
     void Update()
@@ -24,9 +47,10 @@ public class Shape : MonoBehaviour
             else
             {
                 UpdateGameBoard();
+                SoundManager.Instance.PlayOneShot(SoundManager.Instance.shapeMove);
+
             }
 
-           // Debug.Log(transform.position);
         }
 
         if (Input.GetKeyDown("d"))
@@ -40,12 +64,11 @@ public class Shape : MonoBehaviour
             else
             {
                 UpdateGameBoard();
+                SoundManager.Instance.PlayOneShot(SoundManager.Instance.shapeMove);
             }
-
-            //Debug.Log(transform.position);
         }
 
-        if (Input.GetKeyDown("s") || Time.time - lastMoveDown >= 1)
+        if (Input.GetKeyDown("s") || Time.time - lastMoveDown >= Shape.speed)
         {
             transform.position += new Vector3(0, -1, 0);
 
@@ -58,23 +81,21 @@ public class Shape : MonoBehaviour
                 if(rowDeleted)
                 {
                     GameBoard.DeleteAllFullRows();
-
-                    //TODO change the score on UI
-                    IncreaseTextUIScore();
-
                 }
 
                 enabled = false;
 
                 FindObjectOfType<ShapeSpawner>().SpawnShape();
+
+                SoundManager.Instance.PlayOneShot(SoundManager.Instance.shapeStop);
             }
             else
             {
                 UpdateGameBoard();
+                SoundManager.Instance.PlayOneShot(SoundManager.Instance.shapeMove);
             }
             lastMoveDown = Time.time;
 
-           // Debug.Log(transform.position);
         }
 
         if (Input.GetKeyDown("w"))
@@ -88,9 +109,9 @@ public class Shape : MonoBehaviour
             else
             {
                 UpdateGameBoard();
+                SoundManager.Instance.PlayOneShot(SoundManager.Instance.rotateSound);
             }
 
-            //Debug.Log(transform.position);
         }
 
         if (Input.GetKeyDown("e"))
@@ -104,23 +125,18 @@ public class Shape : MonoBehaviour
             else
             {
                 UpdateGameBoard();
+                SoundManager.Instance.PlayOneShot(SoundManager.Instance.rotateSound);
             }
 
-            //Debug.Log(transform.position);
         }
     }
 
     public bool IsInGrid()
     {
-      //  int childCount = 0;
 
         foreach (Transform childBlock in transform)
         {
             Vector2 vect = RoundVector(childBlock.position);
-
-         //   childCount++;
-
-            //Debug.Log(childCount + " " + childBlock.position);
 
             if(!IsInBorder(vect))
             {
@@ -166,17 +182,6 @@ public class Shape : MonoBehaviour
 
             Debug.Log("Cube at" + vect.x + " " + vect.y);
         }
-
-      //  GameBoard.PrintArray();
     }
 
-    void IncreaseTextUIScore()
-    {
-        var textUIComp = GameObject.Find("Score").GetComponent<Text>();
-
-        int score = int.Parse(textUIComp.text);
-        score++;
-
-        textUIComp.text = score.ToString();
-    }
 }
