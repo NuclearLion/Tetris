@@ -54,6 +54,7 @@
   <ItemGroup>
     <Compile Include="Assets\Scripts\ShapeSpawner.cs" />
     <Compile Include="Assets\Scripts\Shape.cs" />
+    <Compile Include="Assets\Scripts\GameBoard.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="UnityEngine">

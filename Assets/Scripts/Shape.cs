@@ -26,8 +26,12 @@ public class Shape : MonoBehaviour
             {
                 transform.position += new Vector3(1, 0, 0);
             }
+            else
+            {
+                UpdateGameBoard();
+            }
 
-            Debug.Log(transform.position);
+           // Debug.Log(transform.position);
         }
 
         if (Input.GetKeyDown("d"))
@@ -38,8 +42,12 @@ public class Shape : MonoBehaviour
             {
                 transform.position += new Vector3(-1, 0, 0);
             }
+            else
+            {
+                UpdateGameBoard();
+            }
 
-            Debug.Log(transform.position);
+            //Debug.Log(transform.position);
         }
 
         if (Input.GetKeyDown("s") || Time.time - lastMoveDown >= 1)
@@ -49,11 +57,18 @@ public class Shape : MonoBehaviour
             if (!IsInGrid())
             {
                 transform.position += new Vector3(0, 1, 0);
-            }
 
+                enabled = false;
+
+                FindObjectOfType<ShapeSpawner>().SpawnShape();
+            }
+            else
+            {
+                UpdateGameBoard();
+            }
             lastMoveDown = Time.time;
 
-            Debug.Log(transform.position);
+           // Debug.Log(transform.position);
         }
 
         if (Input.GetKeyDown("w"))
@@ -64,23 +79,49 @@ public class Shape : MonoBehaviour
             {
                 transform.Rotate(0, 0, -90);
             }
+            else
+            {
+                UpdateGameBoard();
+            }
 
-            Debug.Log(transform.position);
+            //Debug.Log(transform.position);
+        }
+
+        if (Input.GetKeyDown("e"))
+        {
+            transform.Rotate(0, 0, -90);
+
+            if (!IsInGrid())
+            {
+                transform.Rotate(0, 0, 90);
+            }
+            else
+            {
+                UpdateGameBoard();
+            }
+
+            //Debug.Log(transform.position);
         }
     }
 
     public bool IsInGrid()
     {
-        int childCount = 0;
+      //  int childCount = 0;
 
         foreach (Transform childBlock in transform)
         {
-            Vector2 vect = childBlock.position;
-            childCount++;
+            Vector2 vect = RoundVector(childBlock.position);
 
-            Debug.Log(childCount + " " + childBlock.position);
+         //   childCount++;
+
+            //Debug.Log(childCount + " " + childBlock.position);
 
             if(!IsInBorder(vect))
+            {
+                return false;
+            }
+
+            if(GameBoard.gameBoard[(int)vect.x, (int)vect.y] != null && GameBoard.gameBoard[(int)vect.x, (int)vect.y].parent != transform)
             {
                 return false;
             }
@@ -89,9 +130,37 @@ public class Shape : MonoBehaviour
         return true;
     }
 
-    public static bool IsInBorder(Vector2 pos )
+    public Vector2 RoundVector(Vector2 vect)
     {
-        return ((int)pos.x >= -4.31 && (int)pos.x <= 5.69 && (int)pos.y >= -10);
+        return new Vector2(Mathf.Round(vect.x), Mathf.Round(vect.y));
     }
 
+    public static bool IsInBorder(Vector2 pos )
+    {
+        return ((int)pos.x >= 0 && (int)pos.x <= 9 && (int)pos.y >= 0);
+    }
+
+    public void UpdateGameBoard()
+    {
+        for(int y = 0; y<20; ++y)
+        {
+            for(int x = 0; x<10; ++x)
+            {
+                if(GameBoard.gameBoard[x,y] != null && GameBoard.gameBoard[x, y].parent == transform)
+                {
+                    GameBoard.gameBoard[x, y] = null;
+                }
+            }
+        }
+
+        foreach(Transform childBlock in transform)
+        {
+            Vector2 vect = RoundVector(childBlock.position);
+            GameBoard.gameBoard[(int)vect.x, (int)vect.y] = childBlock;
+
+            Debug.Log("Cube at" + vect.x + " " + vect.y);
+        }
+
+        GameBoard.PrintArray();
+    }
 }
